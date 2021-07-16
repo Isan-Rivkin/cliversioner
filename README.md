@@ -42,7 +42,7 @@ func main(){
 
 The library support opting out via environment variable via `optoutEnvVar` indicator.
 
-Assuming that `optoutEnvVar` = `MY_CLI_CHECK_VERSION` and the caller has the env var `MY_CLI_CHECK_VERSION` = `false` then the lbirary will skip version check against remote server.
+Assuming that `optoutEnvVar` = `MY_CLI_CHECK_VERSION` and the caller has the env var `MY_CLI_CHECK_VERSION` = `false` then the library will skip version check against remote server.
 
 ```go
 func NewInput(app, url, currentVersion string, optoutEnvVar *string) *VersionInput
