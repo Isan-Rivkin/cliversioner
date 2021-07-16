@@ -33,7 +33,7 @@ func main(){
     }
 
     if output.Outdated {
-    	fmt.Printf("%s is not latest, %s, upgrade to %s", output.CurrentVersion, output.Message, outputLatestVersion)
+    	fmt.Printf("%s is not latest, %s, upgrade to %s", output.CurrentVersion, output.Message, output.LatestVersion)
     }
 }
 ```
