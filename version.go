@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"runtime"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	latest "github.com/tcnksm/go-latest"
@@ -48,6 +50,36 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func getCheckInput(i *VersionInput) (latest.Source, error) {
+
+	if i == nil {
+		return nil, fmt.Errorf("input is nil")
+	}
+
+	u := i.URL
+
+	if strings.Contains(u, "github.com") {
+		owner := path.Base(u)
+
+		if owner == "" {
+			return nil, fmt.Errorf("no owner found %s", u)
+		}
+
+		log.Debug("creating github input ", owner)
+
+		return &latest.GithubTag{
+			Owner:      owner,
+			Repository: i.App,
+		}, nil
+
+	} else {
+		json := &latest.JSON{
+			URL: fmt.Sprintf("%s/version?app=%s&current_version=%s&os=%s", i.URL, i.App, i.CurrentVersion, i.Os),
+		}
+		return json, nil
+	}
+}
+
 func CheckVersion(input *VersionInput) (*VersionOutput, error) {
 
 	if input == nil {
@@ -58,11 +90,14 @@ func CheckVersion(input *VersionInput) (*VersionOutput, error) {
 		return nil, errors.New("User-OptOut-Version-Check")
 	}
 
-	json := &latest.JSON{
-		URL: fmt.Sprintf("%s/version?app=%s&current_version=%s&os=%s", input.URL, input.App, input.CurrentVersion, input.Os),
+	i, err := getCheckInput(input)
+
+	if err != nil {
+		log.WithError(err).Debug("failed creating input for version check")
+		return nil, err
 	}
 
-	res, err := latest.Check(json, input.CurrentVersion)
+	res, err := latest.Check(i, input.CurrentVersion)
 
 	if err != nil {
 		log.WithError(err).Debug("failed fetching latest version check")
